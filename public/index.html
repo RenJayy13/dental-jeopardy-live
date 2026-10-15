@@ -16,7 +16,7 @@
 <section id="clue" class="question" hidden><h3 id="clueCategory"></h3><h2 id="clueText"></h2>
 <div id="hostClue" hidden><button id="open">🔔 Open buzzers</button><button id="lock">Lock buzzers</button><h3 id="winner"></h3><div id="buzzOpenTimer" class="answerTimer" role="timer" hidden><p>TIME TO BUZZ</p><strong id="buzzOpenNumber">30</strong><p>seconds remaining • original game-show melody</p></div><div id="answerTimer" class="answerTimer" role="timer" hidden><p>TIME TO ANSWER</p><strong id="timerNumber">5</strong><p id="timerStatus">seconds remaining</p></div><button id="reveal">Reveal answer</button><p id="answer" hidden></p><div id="award"></div>
 <div id="dailyPanel" hidden><h2>⭐ DAILY DOUBLE!</h2><p>Select the team answering and enter a wager.</p><select id="dailyTeam"></select><input id="dailyWager" type="number" min="5" placeholder="Wager"><button id="dailyCorrect">Correct ✓</button><button id="dailyWrong">Incorrect ✕</button></div><button id="next">Next question</button></div>
-<div id="studentClue" hidden><p id="buzzStatus"></p><button class="buzz" id="buzz" disabled>BUZZ!</button></div>
+<div id="studentClue" hidden><div id="studentBuzzTimer" class="answerTimer" role="timer" hidden><p>TIME TO BUZZ</p><strong id="studentBuzzNumber">30</strong><p>seconds remaining</p></div><p id="buzzStatus"></p><button class="buzz" id="buzz" disabled>BUZZ!</button></div>
 </section></section>
 <div id="answerOverlay" class="answerOverlay" role="dialog" aria-modal="true" aria-labelledby="answerHeading" hidden><h2 id="answerHeading">THE CORRECT RESPONSE</h2><p id="answerBig"></p><button id="answerClose">Back to scoring</button></div>
-<script src="/app.js?v=20261014-buzz30"></script></body></html>
+<script src="/app.js?v=20261014-buzz30-fix2"></script></body></html>
