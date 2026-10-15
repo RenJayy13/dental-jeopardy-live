@@ -2,13 +2,15 @@
 const $=id=>document.getElementById(id);
 const categories=['Dental Anatomy','Instruments & Materials','Infection Control','Dental Radiography','Clinical Procedures'];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let ws,host=false,state=null,questions=null,audio=null,soundOn=false,previous=null;
+let ws,host=false,state=null,questions=null,audio=null,soundOn=false,previous=null,lastTimerSecond=null;
 fetch('/questions.json').then(r=>r.json()).then(q=>{questions=q;render()}).catch(()=>alert('Questions failed to load'));
 function send(type,extra={}){if(ws?.readyState===1)ws.send(JSON.stringify({type,...extra}));else alert('Connection lost; please reload')}
 function connect(callback){$('connectionStatus').textContent='Connecting to game server…';ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);ws.onopen=()=>{$('connectionStatus').textContent='Connected. Creating or joining room…';callback()};ws.onerror=()=>{$('connectionStatus').textContent='Connection error. Check that Render is Live and try refreshing.'};ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='error')return alert(m.message);if(m.type==='created')history.replaceState(null,'','?room='+m.code);if(m.type==='state'){soundState(m);state=m;render()}};ws.onclose=()=>{$('connectionStatus').textContent='Disconnected. Reload the page to try again.'}}
 function note(freq,offset,duration){if(!audio||!soundOn)return;const o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime+offset;o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.11,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+duration+.03)}
 function sound(name){const seq={open:[520,740],buzz:[310,245],reveal:[392,494,587,784],correct:[523,659,784],wrong:[370,294,220],daily:[392,523,659,784],final:[294,392,494,587]}[name]||[];seq.forEach((f,i)=>note(f,i*.18,.25))}
 function enableSound(){try{const C=window.AudioContext||window.webkitAudioContext;audio=audio||new C();audio.resume();soundOn=true;$('soundToggle').textContent='🔊 Sound On';$('soundToggle').setAttribute('aria-pressed','true');return true}catch{alert('This browser cannot play sound');return false}}
+function updateTimer(){const deadline=state?.buzzDeadline,active=host&&!!state?.question&&!!state?.winner&&Number.isFinite(deadline);$('answerTimer').hidden=!active;if(!active){lastTimerSecond=null;return}const seconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));$('timerNumber').textContent=seconds||'TIME!';$('timerStatus').textContent=seconds?'seconds remaining':'Time is up!';$('answerTimer').classList.toggle('expired',seconds===0);if(lastTimerSecond!==seconds){if(lastTimerSecond!==null&&seconds>0&&seconds<5)note(660,0,.12);if(seconds===0&&lastTimerSecond!==null)sound('wrong');lastTimerSecond=seconds}}
+setInterval(updateTimer,100);
 function soundState(m){if(host&&previous){if(m.lastScore&&JSON.stringify(m.lastScore)!==JSON.stringify(previous.lastScore))sound(m.lastScore.points>=0?'correct':'wrong');else if(m.winner&&!previous.winner)sound('buzz');else if(m.question?.daily&&m.question.key!==previous.question?.key)sound('daily');else if(m.round==='final'&&previous.round!=='final')sound('final');else if(m.buzzOpen&&!previous.buzzOpen)sound('open')}previous=m}
 $('soundToggle').onclick=()=>{if(soundOn){soundOn=false;$('soundToggle').textContent='🔇 Enable Sound';$('soundToggle').setAttribute('aria-pressed','false')}else if(enableSound())sound('correct')};
 $('testSound').onclick=()=>{if(soundOn||enableSound())sound('reveal')};
@@ -27,7 +29,7 @@ $('answerClose').onclick=()=>{$('answerOverlay').hidden=true};
 $('next').onclick=()=>{if(!state?.question)return;$('answerOverlay').hidden=true;$('answer').hidden=true;$('clue').hidden=true;send('next')};
 function dailyAward(correct){const team=Number($('dailyTeam').value),wager=Number($('dailyWager').value),max=Math.max(state.teams[team].score,state.round==='double'?1000:500);if(!Number.isInteger(wager)||wager<5||wager>max)return alert('Wager must be between $5 and $'+max);$('clue').hidden=true;send('dailyTeam',{team});send('dailyAward',{wager,correct})}
 $('dailyCorrect').onclick=()=>dailyAward(true);$('dailyWrong').onclick=()=>dailyAward(false);
-function render(){if(!state||!questions)return;
+function render(){if(!state||!questions)return;updateTimer();
 $('setup').hidden=true;$('game').hidden=false;$('room').textContent='Room code: '+state.code;
 $('scores').innerHTML=state.teams.map(t=>'<div>'+esc(t.name)+'<br><strong>$'+t.score+'</strong></div>').join('');
 $('host').hidden=!host;$('studentHome').hidden=host||!!state.question;
