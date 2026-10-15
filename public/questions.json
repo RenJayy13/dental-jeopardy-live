@@ -1,0 +1,338 @@
+{
+  "beginner": [
+    [
+      [
+        "How many teeth are in a complete adult dentition?",
+        "32"
+      ],
+      [
+        "Which teeth cut food?",
+        "Incisors"
+      ],
+      [
+        "What is the hardest tissue in the body?",
+        "Enamel"
+      ],
+      [
+        "Which teeth usually have a single pointed cusp?",
+        "Canines"
+      ],
+      [
+        "What is the soft tissue inside the pulp chamber?",
+        "Dental pulp"
+      ]
+    ],
+    [
+      [
+        "What instrument provides indirect vision?",
+        "Mouth mirror"
+      ],
+      [
+        "Which instrument helps detect surface irregularities?",
+        "Explorer"
+      ],
+      [
+        "What device removes fluids with suction?",
+        "Saliva ejector"
+      ],
+      [
+        "What material is used for many preliminary impressions?",
+        "Alginate"
+      ],
+      [
+        "What tool polymerizes light-cured composite?",
+        "Curing light"
+      ]
+    ],
+    [
+      [
+        "What does PPE stand for?",
+        "Personal protective equipment"
+      ],
+      [
+        "What is hand hygiene used to reduce?",
+        "Transmission of microorganisms"
+      ],
+      [
+        "What does an autoclave use to sterilize?",
+        "Pressurized steam"
+      ],
+      [
+        "What does OSHA stand for?",
+        "Occupational Safety and Health Administration"
+      ],
+      [
+        "What verifies sterilization using resistant spores?",
+        "Biological indicator (spore test)"
+      ]
+    ],
+    [
+      [
+        "Which image shows crowns of opposing posterior teeth?",
+        "Bitewing"
+      ],
+      [
+        "Which radiograph shows the root apex?",
+        "Periapical"
+      ],
+      [
+        "What does ALARA stand for?",
+        "As low as reasonably achievable"
+      ],
+      [
+        "What error creates overlapped interproximal contacts?",
+        "Incorrect horizontal angulation"
+      ],
+      [
+        "What is a panoramic radiograph?",
+        "An extraoral image of the jaws and surrounding structures"
+      ]
+    ],
+    [
+      [
+        "What does four-handed dentistry describe?",
+        "Coordinated dentist-assistant treatment"
+      ],
+      [
+        "What isolates teeth from saliva?",
+        "Dental dam"
+      ],
+      [
+        "What is the first action for a patient emergency?",
+        "Recognize the problem and activate the office emergency plan"
+      ],
+      [
+        "What does CPR stand for?",
+        "Cardiopulmonary resuscitation"
+      ],
+      [
+        "Why is a medical history updated?",
+        "To identify changes affecting safe treatment"
+      ]
+    ]
+  ],
+  "intermediate": [
+    [
+      [
+        "Which permanent tooth commonly has five cusps?",
+        "Mandibular first molar"
+      ],
+      [
+        "What is the CEJ?",
+        "Cementoenamel junction"
+      ],
+      [
+        "Which arch contains the maxillary teeth?",
+        "Upper arch"
+      ],
+      [
+        "What are the two mandibular divisions of the trigeminal nerve?",
+        "The mandibular nerve is the V3 division; it has sensory and motor branches"
+      ],
+      [
+        "What tissue anchors the tooth to alveolar bone?",
+        "Periodontal ligament"
+      ]
+    ],
+    [
+      [
+        "What does an amalgam carrier transport?",
+        "Amalgam to the preparation"
+      ],
+      [
+        "What is the purpose of a wedge with a matrix?",
+        "Adapt the band and help establish a proximal contact"
+      ],
+      [
+        "What is a rubber dam clamp used for?",
+        "Retaining the dental dam"
+      ],
+      [
+        "What instrument is used to contour amalgam?",
+        "Carver"
+      ],
+      [
+        "Why use a liner or base under some restorations?",
+        "To protect the pulp or replace missing dentin when indicated"
+      ]
+    ],
+    [
+      [
+        "What is the Spaulding category for surgical instruments?",
+        "Critical"
+      ],
+      [
+        "What is the correct response to a sharps injury?",
+        "Stop, provide first aid, report, and follow exposure protocol"
+      ],
+      [
+        "Why package instruments before sterilization?",
+        "To maintain sterility after processing"
+      ],
+      [
+        "What is the purpose of a chemical indicator?",
+        "Show exposure to selected processing conditions, not prove sterility"
+      ],
+      [
+        "When should hand hygiene occur around glove use?",
+        "Before donning and after removing gloves"
+      ]
+    ],
+    [
+      [
+        "What radiographic error causes cone cut?",
+        "PID not aligned with receptor"
+      ],
+      [
+        "What produces elongated images in bisecting technique?",
+        "Insufficient vertical angulation"
+      ],
+      [
+        "What does a radiolucent area look like?",
+        "Dark"
+      ],
+      [
+        "What is the main advantage of digital radiography?",
+        "Immediate image acquisition and processing"
+      ],
+      [
+        "What determines radiographic contrast?",
+        "Among other factors, kVp and image processing"
+      ]
+    ],
+    [
+      [
+        "Why is aspiration performed before local anesthetic deposition?",
+        "To reduce risk of intravascular injection"
+      ],
+      [
+        "What is the purpose of high-volume evacuation?",
+        "Remove fluid, debris, and aerosols"
+      ],
+      [
+        "Why record baseline vital signs?",
+        "To identify abnormalities and compare changes"
+      ],
+      [
+        "What is a Class II restoration?",
+        "A restoration involving a proximal surface of a posterior tooth"
+      ],
+      [
+        "What does informed consent require?",
+        "An explanation of material risks, benefits, and alternatives with voluntary agreement"
+      ]
+    ]
+  ],
+  "advanced": [
+    [
+      [
+        "What is the principal sensory nerve to mandibular teeth?",
+        "Inferior alveolar nerve"
+      ],
+      [
+        "Which cusp is typically nonfunctional on a maxillary molar?",
+        "Buccal cusp"
+      ],
+      [
+        "What is clinical attachment level measured relative to?",
+        "Cementoenamel junction"
+      ],
+      [
+        "Which nerve supplies the buccal gingiva of mandibular molars?",
+        "Long buccal nerve"
+      ],
+      [
+        "What is the primary function of the periodontal ligament?",
+        "Support, shock absorption, and proprioception"
+      ]
+    ],
+    [
+      [
+        "What is the purpose of a sectional matrix ring?",
+        "Create separation and contour for posterior composite contacts"
+      ],
+      [
+        "What causes polymerization shrinkage stress?",
+        "Contraction of resin during curing"
+      ],
+      [
+        "Why is isolation important for adhesive bonding?",
+        "Moisture contamination can compromise bond strength"
+      ],
+      [
+        "What does a hemostatic agent do during retraction?",
+        "Controls gingival bleeding and crevicular fluid"
+      ],
+      [
+        "Why use a bite registration?",
+        "Record the relationship between opposing arches"
+      ]
+    ],
+    [
+      [
+        "What does a failed biological indicator suggest?",
+        "Potential sterilization failure requiring immediate investigation and protocol response"
+      ],
+      [
+        "How are semicritical heat-sensitive devices processed?",
+        "Use FDA-cleared high-level disinfection if sterilization is not feasible and device instructions permit"
+      ],
+      [
+        "What is the purpose of an ultrasonic cleaner?",
+        "Remove debris before sterilization; it does not sterilize"
+      ],
+      [
+        "What distinguishes sterilization from disinfection?",
+        "Sterilization destroys all forms of microbial life, including spores"
+      ],
+      [
+        "What is the recommended hierarchy for reprocessing?",
+        "Cleaning followed by appropriate packaging and sterilization or disinfection"
+      ]
+    ],
+    [
+      [
+        "What causes foreshortening with bisecting technique?",
+        "Excessive vertical angulation"
+      ],
+      [
+        "Which radiographic finding suggests proximal caries?",
+        "A radiolucency beneath the contact area"
+      ],
+      [
+        "What is the purpose of a rectangular collimator?",
+        "Reduce the irradiated field and patient dose"
+      ],
+      [
+        "Why are retakes undesirable?",
+        "They increase radiation exposure without added diagnostic benefit"
+      ],
+      [
+        "What is a major limitation of panoramic imaging?",
+        "Lower fine-detail resolution and geometric distortion compared with intraoral images"
+      ]
+    ],
+    [
+      [
+        "What is the immediate priority in suspected syncope?",
+        "Stop treatment, assess airway/breathing/circulation, and position patient appropriately"
+      ],
+      [
+        "What is the purpose of a surgical time-out?",
+        "Confirm patient, procedure, and site before starting"
+      ],
+      [
+        "What is the rationale for checking aspiration before injection?",
+        "Identify possible intravascular needle placement"
+      ],
+      [
+        "What does a positive aspiration indicate?",
+        "Blood has entered the cartridge; reposition before injection"
+      ],
+      [
+        "Why document anesthetic type and dose?",
+        "For medication safety, continuity of care, and adverse-event assessment"
+      ]
+    ]
+  ]
+}
