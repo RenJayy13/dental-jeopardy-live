@@ -1,236 +1,36 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>North-West College Dental Jeopardy</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #071638;
-      color: white;
-      text-align: center;
-    }
-
-    header {
-      background: #123d9b;
-      padding: 25px;
-    }
-
-    h1 {
-      color: #ffdb65;
-      margin: 5px;
-    }
-
-    button, input {
-      padding: 14px;
-      margin: 8px;
-      border-radius: 10px;
-      font-size: 18px;
-    }
-
-    button {
-      background: #2259c9;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    input {
-      max-width: 250px;
-    }
-
-    .panel {
-      padding: 25px;
-    }
-
-    .teams {
-      display: flex;
-      justify-content: space-around;
-      gap: 10px;
-      margin: 20px;
-    }
-
-    .team {
-      background: #16419a;
-      padding: 20px;
-      flex: 1;
-      border-radius: 12px;
-    }
-
-    .score {
-      color: #ffdb65;
-      font-size: 30px;
-      font-weight: bold;
-    }
-
-    .buzzer {
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      background: #d62828;
-      border: 10px solid #ff7777;
-      font-size: 36px;
-      font-weight: bold;
-    }
-
-    .buzzer:disabled {
-      background: #777;
-      border-color: #aaa;
-    }
-
-    #game {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-
-<header>
-  <h1>DENTAL JEOPARDY LIVE</h1>
-  <p>North-West College</p>
-</header>
-
-<section id="setup" class="panel">
-  <h2>Welcome!</h2>
-
-  <button onclick="createGame()">
-    Instructor: Create Game
-  </button>
-
-  <h3>Students Join Here</h3>
-
-  <input id="code" placeholder="6-digit room code">
-  <input id="name" placeholder="Your name">
-
-  <button onclick="joinGame()">
-    Join Game
-  </button>
-</section>
-
-<section id="game">
-  <h2 id="room"></h2>
-
-  <div class="teams" id="teams"></div>
-
-  <div id="hostControls" style="display:none">
-    <h2>Instructor Controls</h2>
-    <button onclick="send('openBuzzers')">
-      Open Buzzers
-    </button>
-    <button onclick="send('closeBuzzers')">
-      Lock Buzzers
-    </button>
-    <h3 id="winner"></h3>
-  </div>
-
-  <div id="studentControls" style="display:none">
-    <h2 id="status">Waiting for question...</h2>
-    <button id="buzz" class="buzzer"
-            onclick="send('buzz')" disabled>
-      BUZZ!
-    </button>
-  </div>
-</section>
-
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dental Jeopardy Live</title><style>
+body{background:#061943;color:white;font-family:Arial,sans-serif;text-align:center;margin:0;padding:18px}h1{color:#ffdc70}button,select,input{font:inherit;padding:12px;margin:5px;border-radius:7px;border:0}button{background:#2859c4;color:white;cursor:pointer}button:disabled{opacity:.4}.board{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-width:1150px;margin:20px auto}.board>*{background:#1645a0;color:#ffdd75;padding:15px 4px;min-width:0}.board b{font-size:13px;color:white}.scores{display:flex;justify-content:center;gap:8px}.scores>div{background:#163778;padding:15px;flex:1;max-width:260px}.scores strong{color:#ffdb6d;font-size:28px}.question{position:fixed;inset:0;background:#123b96;padding:8vh 5vw;overflow:auto;z-index:4}.question h2{font-size:clamp(24px,4vw,52px);margin:7vh auto;max-width:1000px}.buzz{background:#d72b2b;border:9px solid #ff8a8a;border-radius:50%;width:220px;height:220px;font-size:34px}.controls{margin:15px auto;padding:15px;background:#112d67;border-radius:12px;max-width:950px}.muted{color:#c6d5f6}#students{margin:12px}#students label{display:inline-block;margin:8px}
+</style></head><body><h1>🦷 DENTAL JEOPARDY LIVE</h1><p>North-West College • Three teams • 11 student buzzers</p>
+<div id="setup"><button id="create">Instructor: Create Room</button><p>Students: Enter room code and name</p><input id="code" placeholder="6-digit room code"><input id="name" placeholder="Student name"><button id="join">Join Room</button></div>
+<div id="game" hidden><h2 id="room"></h2><div class="scores" id="scores"></div><div id="host" hidden><div class="controls"><label>Level <select id="level"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label><button id="copy">Copy student link</button><p class="muted">Share this browser tab in Zoom with Share Sound enabled. Students use their own phones or computers.</p><div id="students"></div></div><div class="board" id="board"></div></div>
+<div id="clue" class="question" hidden><h3 id="clueCategory"></h3><h2 id="clueText"></h2><div id="instructorClue" hidden><button id="open">🔔 Open buzzers</button><button id="lock">Lock buzzers</button><h3 id="winner"></h3><button id="reveal">Reveal answer</button><p id="answer" hidden></p><div id="award"></div><button id="next">Next question</button></div><div id="studentClue" hidden><p id="buzzStatus"></p><button class="buzz" id="buzz" disabled>BUZZ!</button></div></div></div>
 <script>
-  let socket;
-  let instructor = false;
-
-  function connect(callback) {
-    const protocol =
-      location.protocol === "https:" ? "wss:" : "ws:";
-
-    socket = new WebSocket(
-      protocol + "//" + location.host
-    );
-
-    socket.onopen = callback;
-
-    socket.onmessage = event => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === "created") {
-        document.getElementById("room").textContent =
-          "Room Code: " + data.code;
-      }
-
-      if (data.type === "error") {
-        alert(data.message);
-      }
-
-      if (data.type === "state") {
-        showGame(data);
-      }
-    };
-  }
-
-  function send(type, extra = {}) {
-    socket.send(JSON.stringify({ type, ...extra }));
-  }
-
-  function createGame() {
-    instructor = true;
-    connect(() => send("create"));
-  }
-
-  function joinGame() {
-    instructor = false;
-
-    const code =
-      document.getElementById("code").value;
-
-    const name =
-      document.getElementById("name").value;
-
-    connect(() => send("join", { code, name }));
-  }
-
-  function showGame(data) {
-    document.getElementById("setup").style.display =
-      "none";
-
-    document.getElementById("game").style.display =
-      "block";
-
-    document.getElementById("room").textContent =
-      "Room Code: " + data.code;
-
-    document.getElementById("hostControls").style.display =
-      instructor ? "block" : "none";
-
-    document.getElementById("studentControls").style.display =
-      instructor ? "none" : "block";
-
-    document.getElementById("teams").innerHTML =
-      data.teams.map(team => `
-        <div class="team">
-          <h3>${team.name}</h3>
-          <div class="score">$${team.score}</div>
-        </div>
-      `).join("");
-
-    if (data.winner) {
-      document.getElementById("winner").textContent =
-        "First buzz: " + data.winner.name;
-    } else {
-      document.getElementById("winner").textContent =
-        "Waiting for a buzz...";
-    }
-
-    const buzzer = document.getElementById("buzz");
-    buzzer.disabled = !data.buzzOpen;
-
-    document.getElementById("status").textContent =
-      data.winner
-        ? data.winner.name + " buzzed first!"
-        : data.buzzOpen
-          ? "BUZZERS OPEN!"
-          : "Waiting for instructor...";
-  }
-</script>
-
-</body>
-</html>
+let ws,host=false,state=null,questions=null,playerId=null;const $=id=>document.getElementById(id);
+const categories=['Dental Anatomy','Instruments & Materials','Infection Control','Dental Radiography','Clinical Procedures'];
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+fetch('/questions.json').then(r=>r.json()).then(j=>questions=j).catch(()=>alert('Could not load questions.'));
+function send(type,more={}){if(ws?.readyState===1)ws.send(JSON.stringify({type,...more}))}
+function connect(onopen){ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);ws.onopen=onopen;ws.onmessage=e=>{let m=JSON.parse(e.data);if(m.type==='error')return alert(m.message);if(m.type==='created'){history.replaceState(null,'','?room='+m.code)}if(m.type==='joined')playerId=m.id;if(m.type==='state'){state=m;render()}};ws.onclose=()=>alert('Connection closed. Reload to rejoin.')}
+$('create').onclick=()=>{host=true;connect(()=>send('create'))};
+$('join').onclick=()=>{let code=$('code').value.trim(),name=$('name').value.trim();if(!/^\d{6}$/.test(code)||!name)return alert('Enter your name and a 6-digit code');host=false;connect(()=>send('join',{code,name}))};
+$('code').value=new URLSearchParams(location.search).get('room')||'';
+$('level').onchange=()=>{if(confirm('Change level and reset scores?'))send('level',{level:$('level').value});else $('level').value=state.level};
+$('copy').onclick=()=>{let url=location.origin+'/?room='+state.code;navigator.clipboard.writeText(url).then(()=>alert('Student link copied')).catch(()=>prompt('Copy link',url))};
+$('open').onclick=()=>send('openBuzzers');$('lock').onclick=()=>send('closeBuzzers');$('buzz').onclick=()=>{send('buzz');$('buzz').disabled=true};
+$('reveal').onclick=()=>{$('answer').hidden=false};
+$('next').onclick=()=>{send('next');$('answer').hidden=true};
+function render(){if(!questions)return setTimeout(render,100);$('setup').hidden=true;$('game').hidden=false;$('room').textContent='Room '+state.code;
+$('scores').innerHTML=state.teams.map(t=>'<div>'+escapeHtml(t.name)+'<br><strong>$'+t.score+'</strong></div>').join('');
+$('host').hidden=!host;$('level').value=state.level;
+if(host){$('students').innerHTML='<b>Students ('+state.players.length+'/11):</b> '+state.players.map(p=>'<label>'+escapeHtml(p.name)+' <select data-id="'+p.id+'">'+state.teams.map((t,i)=>'<option value="'+i+'" '+(p.team===i?'selected':'')+'>'+escapeHtml(t.name)+'</option>').join('')+'</select></label>').join('');$('students').querySelectorAll('select').forEach(s=>s.onchange=()=>send('assign',{id:s.dataset.id,team:Number(s.value)}));
+$('board').innerHTML=categories.map(c=>'<b>'+escapeHtml(c)+'</b>').join('')+Array.from({length:25},(_,n)=>{let row=Math.floor(n/5),col=n%5,key=col+'-'+row;return '<button data-col="'+col+'" data-row="'+row+'" '+(state.used.includes(key)||state.question?'disabled':'')+'>'+(state.used.includes(key)?'✓':'$'+((row+1)*100))+'</button>'}).join('');
+$('board').querySelectorAll('button').forEach(b=>b.onclick=()=>{let c=Number(b.dataset.col),r=Number(b.dataset.row),q=questions[state.level][c][r];send('question',{category:categories[c],value:(r+1)*100,text:q[0],answer:q[1],key:c+'-'+r})});}
+$('clue').hidden=!state.question;if(!state.question)return;
+$('clueCategory').textContent=state.question.category+' • $'+state.question.value;$('clueText').textContent=state.question.text;
+$('instructorClue').hidden=!host;$('studentClue').hidden=host;
+if(host){$('winner').textContent=state.winner?'🔔 '+state.winner.name+' buzzed first ('+state.teams[state.winner.team].name+')':state.buzzOpen?'Buzzers OPEN':'Buzzers locked';$('answer').textContent=state.answer||'';
+$('award').innerHTML=state.teams.map((t,i)=>'<div>'+escapeHtml(t.name)+' <button data-team="'+i+'" data-points="'+state.question.value+'">Correct +$'+state.question.value+'</button> <button data-team="'+i+'" data-points="'+(-state.question.value)+'">Incorrect -$'+state.question.value+'</button></div>').join('');
+$('award').querySelectorAll('button').forEach(b=>b.onclick=()=>send('score',{team:Number(b.dataset.team),points:Number(b.dataset.points)}));
+}else{$('buzzStatus').textContent=state.winner?state.winner.name+' buzzed first':state.buzzOpen?'Buzz now!':'Waiting for instructor';$('buzz').disabled=!state.buzzOpen||!!state.winner}
+}
+</script></body></html>
