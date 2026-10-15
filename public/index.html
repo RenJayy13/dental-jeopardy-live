@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>North-West College Dental Jeopardy</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #071638;
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      background: #123d9b;
+      padding: 25px;
+    }
+
+    h1 {
+      color: #ffdb65;
+      margin: 5px;
+    }
+
+    button, input {
+      padding: 14px;
+      margin: 8px;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+
+    button {
+      background: #2259c9;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    input {
+      max-width: 250px;
+    }
+
+    .panel {
+      padding: 25px;
+    }
+
+    .teams {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      margin: 20px;
+    }
+
+    .team {
+      background: #16419a;
+      padding: 20px;
+      flex: 1;
+      border-radius: 12px;
+    }
+
+    .score {
+      color: #ffdb65;
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    .buzzer {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: #d62828;
+      border: 10px solid #ff7777;
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    .buzzer:disabled {
+      background: #777;
+      border-color: #aaa;
+    }
+
+    #game {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>DENTAL JEOPARDY LIVE</h1>
+  <p>North-West College</p>
+</header>
+
+<section id="setup" class="panel">
+  <h2>Welcome!</h2>
+
+  <button onclick="createGame()">
+    Instructor: Create Game
+  </button>
+
+  <h3>Students Join Here</h3>
+
+  <input id="code" placeholder="6-digit room code">
+  <input id="name" placeholder="Your name">
+
+  <button onclick="joinGame()">
+    Join Game
+  </button>
+</section>
+
+<section id="game">
+  <h2 id="room"></h2>
+
+  <div class="teams" id="teams"></div>
+
+  <div id="hostControls" style="display:none">
+    <h2>Instructor Controls</h2>
+    <button onclick="send('openBuzzers')">
+      Open Buzzers
+    </button>
+    <button onclick="send('closeBuzzers')">
+      Lock Buzzers
+    </button>
+    <h3 id="winner"></h3>
+  </div>
+
+  <div id="studentControls" style="display:none">
+    <h2 id="status">Waiting for question...</h2>
+    <button id="buzz" class="buzzer"
+            onclick="send('buzz')" disabled>
+      BUZZ!
+    </button>
+  </div>
+</section>
+
+<script>
+  let socket;
+  let instructor = false;
+
+  function connect(callback) {
+    const protocol =
+      location.protocol === "https:" ? "wss:" : "ws:";
+
+    socket = new WebSocket(
+      protocol + "//" + location.host
+    );
+
+    socket.onopen = callback;
+
+    socket.onmessage = event => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === "created") {
+        document.getElementById("room").textContent =
+          "Room Code: " + data.code;
+      }
+
+      if (data.type === "error") {
+        alert(data.message);
+      }
+
+      if (data.type === "state") {
+        showGame(data);
+      }
+    };
+  }
+
+  function send(type, extra = {}) {
+    socket.send(JSON.stringify({ type, ...extra }));
+  }
+
+  function createGame() {
+    instructor = true;
+    connect(() => send("create"));
+  }
+
+  function joinGame() {
+    instructor = false;
+
+    const code =
+      document.getElementById("code").value;
+
+    const name =
+      document.getElementById("name").value;
+
+    connect(() => send("join", { code, name }));
+  }
+
+  function showGame(data) {
+    document.getElementById("setup").style.display =
+      "none";
+
+    document.getElementById("game").style.display =
+      "block";
+
+    document.getElementById("room").textContent =
+      "Room Code: " + data.code;
+
+    document.getElementById("hostControls").style.display =
+      instructor ? "block" : "none";
+
+    document.getElementById("studentControls").style.display =
+      instructor ? "none" : "block";
+
+    document.getElementById("teams").innerHTML =
+      data.teams.map(team => `
+        <div class="team">
+          <h3>${team.name}</h3>
+          <div class="score">$${team.score}</div>
+        </div>
+      `).join("");
+
+    if (data.winner) {
+      document.getElementById("winner").textContent =
+        "First buzz: " + data.winner.name;
+    } else {
+      document.getElementById("winner").textContent =
+        "Waiting for a buzz...";
+    }
+
+    const buzzer = document.getElementById("buzz");
+    buzzer.disabled = !data.buzzOpen;
+
+    document.getElementById("status").textContent =
+      data.winner
+        ? data.winner.name + " buzzed first!"
+        : data.buzzOpen
+          ? "BUZZERS OPEN!"
+          : "Waiting for instructor...";
+  }
+</script>
+
+</body>
+</html>
