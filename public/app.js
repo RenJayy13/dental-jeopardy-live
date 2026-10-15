@@ -1,6 +1,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const categories=['Dental Anatomy','Instruments & Materials','Infection Control','Dental Radiography','Clinical Procedures'];
+const doubleCategories=['Tooth Numbering & Morphology','Advanced Dental Instruments','Sterilization & OSHA','Radiographic Interpretation','Chairside Care & Emergencies'];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let ws,host=false,state=null,questions=null,audio=null,soundOn=false,previous=null,lastTimerSecond=null;
 fetch('/questions.json').then(r=>r.json()).then(q=>{questions=q;render()}).catch(()=>alert('Questions failed to load'));
@@ -52,8 +53,8 @@ $('students').innerHTML='<b>Students ('+state.players.length+'/11):</b> '+state.
 $('students').querySelectorAll('select').forEach(s=>s.onchange=()=>send('assign',{id:s.dataset.id,team:Number(s.value)}));
 $('board').hidden=state.round==='final';$('finalPanel').hidden=state.round!=='final';
 if(state.round==='final'){renderFinal();return}
-$('board').innerHTML=categories.map(c=>'<b>'+esc(c)+'</b>').join('')+Array.from({length:25},(_,n)=>{const row=Math.floor(n/5),col=n%5,key=state.round+':'+col+':'+row,used=state.used.includes(key);return '<button data-col="'+col+'" data-row="'+row+'" '+(used||state.question?'disabled':'')+'>'+(used?'✓':'$'+((row+1)*(state.round==='double'?200:100)))+'</button>'}).join('');
-$('board').querySelectorAll('button').forEach(b=>b.onclick=()=>{const col=Number(b.dataset.col),row=Number(b.dataset.row),q=(state.round==='double'?questions.double[state.level]:questions[state.level])[col][row];$('answer').hidden=true;send('question',{category:categories[col],value:(row+1)*(state.round==='double'?200:100),text:q[0],answer:q[1],key:state.round+':'+col+':'+row})});
+$('board').innerHTML=(state.round==='double'?doubleCategories:categories).map(c=>'<b>'+esc(c)+'</b>').join('')+Array.from({length:25},(_,n)=>{const row=Math.floor(n/5),col=n%5,key=state.round+':'+col+':'+row,used=state.used.includes(key);return '<button data-col="'+col+'" data-row="'+row+'" '+(used||state.question?'disabled':'')+'>'+(used?'✓':'$'+((row+1)*(state.round==='double'?200:100)))+'</button>'}).join('');
+$('board').querySelectorAll('button').forEach(b=>b.onclick=()=>{const col=Number(b.dataset.col),row=Number(b.dataset.row),q=(state.round==='double'?questions.double[state.level]:questions[state.level])[col][row];$('answer').hidden=true;send('question',{category:(state.round==='double'?doubleCategories:categories)[col],value:(row+1)*(state.round==='double'?200:100),text:q[0],answer:q[1],key:state.round+':'+col+':'+row})});
 }
 function renderFinal(){const q=questions.final[state.level];$('finalQuestion').textContent=q[0];$('finalAnswer').textContent=jeopardyResponse(q[1]);$('finalTeams').innerHTML=state.teams.map((t,i)=>'<div><b>'+esc(t.name)+'</b> • $'+t.score+' <input id="fw'+i+'" type="number" min="0" max="'+Math.max(0,t.score)+'" placeholder="Wager" value="'+(state.finalWagers[i]??'')+'"><button data-save="'+i+'">Save wager</button><button data-grade="'+i+'" data-correct="1">Correct</button><button data-grade="'+i+'" data-correct="0">Incorrect</button></div>').join('');
 $('finalTeams').querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{const team=Number(b.dataset.save),wager=Number($('fw'+team).value);if(!Number.isInteger(wager)||wager<0||wager>Math.max(0,state.teams[team].score))return alert('Invalid wager');send('finalWager',{team,wager})});
