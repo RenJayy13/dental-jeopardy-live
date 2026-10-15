@@ -22,7 +22,8 @@ $('round').onchange=()=>{if(confirm('Start this round? Scores will be preserved.
 $('copy').onclick=()=>{const url=location.origin+'/?room='+state.code;navigator.clipboard.writeText(url).then(()=>alert('Student link copied')).catch(()=>prompt('Copy link',url))};
 $('open').onclick=()=>send('openBuzzers');$('lock').onclick=()=>send('closeBuzzers');
 $('buzz').onclick=()=>{send('buzz');$('buzz').disabled=true};
-function reveal(text){sound('reveal');$('answerBig').textContent=text;$('answerOverlay').hidden=false;$('answerClose').focus()}
+function jeopardyResponse(answer){const a=String(answer||'').trim().replace(/[?.!]+$/,'');if(!a)return 'Answer unavailable';if(/^(who|what|where|when|which|how)\s+(is|are|was|were|do|does|did)\b/i.test(a))return a+'?';const plural=/^(incisors|canines|premolars|molars|teeth|gums|gloves|masks|forceps|scalers|radiographs|x-rays|instruments|brackets|dentures|sealants|bacteria|viruses|fluorides|protective glasses|safety glasses|cotton rolls|dental implants|personal protective equipment)\b/i.test(a);return (plural?'What are ':'What is ')+a+'?'}
+function reveal(text){sound('reveal');$('answerBig').textContent=jeopardyResponse(text);$('answerOverlay').hidden=false;$('answerClose').focus()}
 $('reveal').onclick=()=>{if(state?.question){$('answer').hidden=false;reveal(state.answer||'Answer unavailable')}};
 $('finalReveal').onclick=()=>{if(state&&questions){$('finalAnswer').hidden=false;reveal(questions.final[state.level][1])}};
 $('answerClose').onclick=()=>{$('answerOverlay').hidden=true};
@@ -40,7 +41,7 @@ $('clueCategory').textContent=state.question.category+' • $'+state.question.va
 $('hostClue').hidden=!host;$('studentClue').hidden=host;
 if(host){const daily=!!state.question.daily;$('open').hidden=daily;$('lock').hidden=daily;$('award').hidden=daily;$('dailyPanel').hidden=!daily;$('next').hidden=daily;
 $('winner').textContent=state.winner?'🔔 '+state.winner.name+' buzzed first — '+state.teams[state.winner.team].name:state.buzzOpen?'Buzzers OPEN':'Buzzers locked';
-$('answer').textContent=state.answer||'';
+$('answer').textContent=jeopardyResponse(state.answer||'');
 $('award').innerHTML=state.teams.map((t,i)=>'<div>'+esc(t.name)+' <button data-team="'+i+'" data-points="'+state.question.value+'">Correct +$'+state.question.value+'</button> <button data-team="'+i+'" data-points="'+(-state.question.value)+'">Incorrect -$'+state.question.value+'</button></div>').join('');
 $('award').querySelectorAll('button').forEach(b=>{b.disabled=!!state.lastScore;b.onclick=()=>{const team=Number(b.dataset.team),points=Number(b.dataset.points);if(!confirm('Apply '+(points>=0?'+':'')+'$'+points+' to '+state.teams[team].name+'?'))return;$('award').querySelectorAll('button').forEach(x=>x.disabled=true);send('score',{team,points})}});
 $('dailyTeam').innerHTML=state.teams.map((t,i)=>'<option value="'+i+'">'+esc(t.name)+'</option>').join('');
@@ -54,7 +55,7 @@ if(state.round==='final'){renderFinal();return}
 $('board').innerHTML=categories.map(c=>'<b>'+esc(c)+'</b>').join('')+Array.from({length:25},(_,n)=>{const row=Math.floor(n/5),col=n%5,key=state.round+':'+col+':'+row,used=state.used.includes(key);return '<button data-col="'+col+'" data-row="'+row+'" '+(used||state.question?'disabled':'')+'>'+(used?'✓':'$'+((row+1)*(state.round==='double'?200:100)))+'</button>'}).join('');
 $('board').querySelectorAll('button').forEach(b=>b.onclick=()=>{const col=Number(b.dataset.col),row=Number(b.dataset.row),q=(state.round==='double'?questions.double[state.level]:questions[state.level])[col][row];$('answer').hidden=true;send('question',{category:categories[col],value:(row+1)*(state.round==='double'?200:100),text:q[0],answer:q[1],key:state.round+':'+col+':'+row})});
 }
-function renderFinal(){const q=questions.final[state.level];$('finalQuestion').textContent=q[0];$('finalAnswer').textContent=q[1];$('finalTeams').innerHTML=state.teams.map((t,i)=>'<div><b>'+esc(t.name)+'</b> • $'+t.score+' <input id="fw'+i+'" type="number" min="0" max="'+Math.max(0,t.score)+'" placeholder="Wager" value="'+(state.finalWagers[i]??'')+'"><button data-save="'+i+'">Save wager</button><button data-grade="'+i+'" data-correct="1">Correct</button><button data-grade="'+i+'" data-correct="0">Incorrect</button></div>').join('');
+function renderFinal(){const q=questions.final[state.level];$('finalQuestion').textContent=q[0];$('finalAnswer').textContent=jeopardyResponse(q[1]);$('finalTeams').innerHTML=state.teams.map((t,i)=>'<div><b>'+esc(t.name)+'</b> • $'+t.score+' <input id="fw'+i+'" type="number" min="0" max="'+Math.max(0,t.score)+'" placeholder="Wager" value="'+(state.finalWagers[i]??'')+'"><button data-save="'+i+'">Save wager</button><button data-grade="'+i+'" data-correct="1">Correct</button><button data-grade="'+i+'" data-correct="0">Incorrect</button></div>').join('');
 $('finalTeams').querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{const team=Number(b.dataset.save),wager=Number($('fw'+team).value);if(!Number.isInteger(wager)||wager<0||wager>Math.max(0,state.teams[team].score))return alert('Invalid wager');send('finalWager',{team,wager})});
 $('finalTeams').querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{const team=Number(b.dataset.grade);if(state.finalWagers[team]===null)return alert('Save wager first');send('finalAward',{team,correct:b.dataset.correct==='1'})});
 }
