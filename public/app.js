@@ -26,7 +26,8 @@ function soundState(m){if(host&&previous){if(m.lastScore&&JSON.stringify(m.lastS
 $('soundToggle').onclick=()=>{if(soundOn){soundOn=false;$('soundToggle').textContent='🔇 Enable Sound';$('soundToggle').setAttribute('aria-pressed','false')}else if(enableSound())sound('correct')};
 $('testSound').onclick=()=>{if(soundOn||enableSound())sound('reveal')};
 $('undo').onclick=()=>{if(state?.canUndo&&confirm('Undo the most recent game action?'))send('undo')};
-$('celebrate').onclick=()=>{if(!state)return;const high=Math.max(...state.teams.map(t=>t.score)),winners=state.teams.filter(t=>t.score===high);$('winnerTitle').textContent=winners.length>1?'🏆 IT’S A TIE!':'🏆 '+winners[0].name.toUpperCase()+' WINS!';$('winnerScores').innerHTML=[...state.teams].sort((a,b)=>b.score-a.score).map(t=>'<p>'+esc(t.name)+' — 
+$('celebrate').onclick=()=>{if(!state)return;const high=Math.max(...state.teams.map(t=>t.score)),winners=state.teams.filter(t=>t.score===high);$('winnerTitle').textContent=winners.length>1?'🏆 IT’S A TIE!':'🏆 '+winners[0].name.toUpperCase()+' WINS!';$('winnerScores').textContent=state.teams.map(t=>t.name+' $'+t.score).join(' | ');$('winnerOverlay').hidden=false;if(!soundOn)enableSound();sound('final')};
+$('winnerClose').onclick=()=>{$('winnerOverlay').hidden=true};
 $('create').onclick=()=>{host=true;connect(()=>send('create'))};
 $('join').onclick=()=>{const code=$('code').value.trim(),name=$('name').value.trim();if(!/^\d{6}$/.test(code)||!name)return alert('Enter your name and a six-digit room code');host=false;connect(()=>send('join',{code,name}))};
 $('code').value=new URLSearchParams(location.search).get('room')||'';
