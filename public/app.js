@@ -14,12 +14,14 @@ $('round').onchange=()=>{if(confirm('Start this round? Scores will be preserved.
 $('copy').onclick=()=>{const url=location.origin+'/?room='+state.code;navigator.clipboard.writeText(url).then(()=>alert('Student link copied')).catch(()=>prompt('Copy student link',url))};
 $('open').onclick=()=>send('openBuzzers');$('lock').onclick=()=>send('closeBuzzers');
 $('buzz').onclick=()=>{send('buzz');$('buzz').disabled=true};
-$('reveal').onclick=()=>{$('answer').hidden=false};
+function showAnswer(text){$('answerBig').textContent=text;$('answerOverlay').hidden=false;$('answerClose').focus()}
+$('answerClose').onclick=()=>{$('answerOverlay').hidden=true};
+$('reveal').onclick=()=>{if(!state?.question||!host)return;$('answer').hidden=false;showAnswer(state.answer||'Answer unavailable')};
 $('next').onclick=()=>{$('answer').hidden=true;send('next')};
-$('finalReveal').onclick=()=>{$('finalAnswer').hidden=false};
+$('finalReveal').onclick=()=>{if(!host||!questions||!state)return;$('finalAnswer').hidden=false;showAnswer(questions.final[state.level][1])};
 function dailyAward(correct){const team=Number($('dailyTeam').value),wager=Number($('dailyWager').value),max=Math.max(state.teams[team].score,state.round==='double'?1000:500);if(!Number.isInteger(wager)||wager<5||wager>max)return alert('Enter a wager between $5 and $'+max);send('dailyTeam',{team});send('dailyAward',{wager,correct})}
 $('dailyCorrect').onclick=()=>dailyAward(true);$('dailyWrong').onclick=()=>dailyAward(false);
-function render(){if(!state||!questions)return;
+function render(){if(!state||!questions)return;if(!state.question&&state.round!=='final')$('answerOverlay').hidden=true;
 $('setup').hidden=true;$('game').hidden=false;$('room').textContent='Room code: '+state.code;
 $('scores').innerHTML=state.teams.map(t=>'<div>'+escapeHtml(t.name)+'<br><strong>$'+t.score+'</strong></div>').join('');
 $('host').hidden=!host;$('studentHome').hidden=host||!!state.question;if(state.lastScore){const x=state.lastScore;const label=state.teams[x.team].name+' '+(x.points>=0?'awarded +
