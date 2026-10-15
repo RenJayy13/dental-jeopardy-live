@@ -3,9 +3,25 @@ const $=id=>document.getElementById(id);
 const categories=['Dental Anatomy','Instruments & Materials','Infection Control','Dental Radiography','Clinical Procedures'];
 const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let ws,host=false,state=null,questions=null,playerId=null,lastNoticeKey='';
+let audioContext=null,soundEnabled=false,previousSoundState=null;
+function initAudio(){try{const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(!AudioContextClass)throw Error('Audio not supported');audioContext=audioContext||new AudioContextClass();audioContext.resume();return true}catch(e){alert('Audio is unavailable in this browser.');return false}}
+function tone(frequency,start,duration,volume=0.12,wave='sine'){if(!soundEnabled||!audioContext)return;const t=audioContext.currentTime+start,osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type=wave;osc.frequency.setValueAtTime(frequency,t);gain.gain.setValueAtTime(0.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+0.012);gain.gain.exponentialRampToValueAtTime(0.0001,t+duration);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t);osc.stop(t+duration+0.025)}
+function playSound(name){if(!soundEnabled||!audioContext)return;const patterns={
+open:[[520,0,.12],[740,.15,.18]],
+buzz:[[310,0,.18],[245,.17,.24]],
+reveal:[[392,0,.18],[494,.18,.18],[587,.36,.2],[784,.58,.45]],
+correct:[[523,0,.13],[659,.13,.13],[784,.26,.34]],
+wrong:[[370,0,.23],[294,.24,.25],[220,.49,.34]],
+daily:[[392,0,.16],[523,.17,.16],[659,.34,.16],[784,.51,.5]],
+final:[[294,0,.24],[392,.27,.24],[494,.54,.24],[587,.81,.45]]
+};for(const [freq,start,dur] of patterns[name]||[])tone(freq,start,dur,.11,name==='buzz'||name==='wrong'?'triangle':'sine')}
+$('soundToggle').onclick=()=>{if(!soundEnabled){if(!initAudio())return;soundEnabled=true;$('soundToggle').textContent='🔊 Sound On';$('soundToggle').setAttribute('aria-pressed','true');playSound('correct')}else{soundEnabled=false;$('soundToggle').textContent='🔇 Enable Sound';$('soundToggle').setAttribute('aria-pressed','false')}};
+$('testSound').onclick=()=>{if(!soundEnabled){if(!initAudio())return;soundEnabled=true;$('soundToggle').textContent='🔊 Sound On';$('soundToggle').setAttribute('aria-pressed','true')}playSound('reveal')};
+function soundForState(next){if(!host){previousSoundState=next;return}if(previousSoundState){const old=previousSoundState;if(next.lastScore&&(!old.lastScore||JSON.stringify(old.lastScore)!==JSON.stringify(next.lastScore)))playSound(next.lastScore.points>=0?'correct':'wrong');else if(next.winner&&(!old.winner||old.winner.name!==next.winner.name))playSound('buzz');else if(next.question&&(!old.question||old.question.key!==next.question.key)&&next.question.daily)playSound('daily');else if(next.round==='final'&&old.round!=='final')playSound('final');else if(next.buzzOpen&&!old.buzzOpen)playSound('open')}previousSoundState=next}
+
 fetch('/questions.json').then(r=>{if(!r.ok)throw Error('Questions unavailable');return r.json()}).then(q=>{questions=q;if(state)render()}).catch(e=>alert(e.message));
 function send(type,more={}){if(ws?.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type,...more}))}
-function connect(onopen){ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);ws.onopen=onopen;ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='error')return alert(m.message);if(m.type==='created')history.replaceState(null,'','?room='+m.code);if(m.type==='joined')playerId=m.id;if(m.type==='state'){state=m;render()}};ws.onclose=()=>alert('Connection lost. Reload to start or join a new room.')}
+function connect(onopen){ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);ws.onopen=onopen;ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='error')return alert(m.message);if(m.type==='created')history.replaceState(null,'','?room='+m.code);if(m.type==='joined')playerId=m.id;if(m.type==='state'){soundForState(m);state=m;render()}};ws.onclose=()=>alert('Connection lost. Reload to start or join a new room.')}
 $('create').onclick=()=>{host=true;connect(()=>send('create'))};
 $('join').onclick=()=>{const code=$('code').value.trim(),name=$('name').value.trim();if(!/^\d{6}$/.test(code)||!name)return alert('Enter a 6-digit room code and your name');host=false;connect(()=>send('join',{code,name}))};
 $('code').value=new URLSearchParams(location.search).get('room')||'';
@@ -14,7 +30,7 @@ $('round').onchange=()=>{if(confirm('Start this round? Scores will be preserved.
 $('copy').onclick=()=>{const url=location.origin+'/?room='+state.code;navigator.clipboard.writeText(url).then(()=>alert('Student link copied')).catch(()=>prompt('Copy student link',url))};
 $('open').onclick=()=>send('openBuzzers');$('lock').onclick=()=>send('closeBuzzers');
 $('buzz').onclick=()=>{send('buzz');$('buzz').disabled=true};
-function showAnswer(text){$('answerBig').textContent=text;$('answerOverlay').hidden=false;$('answerClose').focus()}
+function showAnswer(text){playSound('reveal');$('answerBig').textContent=text;$('answerOverlay').hidden=false;$('answerClose').focus()}
 $('answerClose').onclick=()=>{$('answerOverlay').hidden=true};
 $('reveal').onclick=()=>{if(!state?.question||!host)return;$('answer').hidden=false;showAnswer(state.answer||'Answer unavailable')};
 $('next').onclick=()=>{$('answer').hidden=true;send('next')};
