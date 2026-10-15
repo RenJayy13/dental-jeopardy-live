@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id);
 const categories=['Dental Anatomy','Instruments & Materials','Infection Control','Dental Radiography','Clinical Procedures'];
 const doubleCategories=['Tooth Numbering & Morphology','Advanced Dental Instruments','Sterilization & OSHA','Radiographic Interpretation','Chairside Care & Emergencies'];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let ws,host=false,state=null,questions=null,audio=null,soundOn=false,previous=null,lastTimerSecond=null,playerId=null,retryCount=0,retryTimer=null,initialAction=null;
+let ws,host=false,state=null,questions=null,audio=null,soundOn=false,previous=null,lastTimerSecond=null,lastOpenSecond=null,musicStep=-1,playerId=null,retryCount=0,retryTimer=null,initialAction=null;
 fetch('/questions.json').then(r=>r.json()).then(q=>{questions=q;render()}).catch(()=>alert('Questions failed to load'));
 function statusMessage(message){$('connectionStatus').textContent=message;const banner=$('reconnectNotice');if(banner){banner.textContent=message;banner.hidden=!state||!message}}
 function send(type,extra={}){if(ws?.readyState===WebSocket.OPEN){ws.send(JSON.stringify({type,...extra}));return true}statusMessage('Connection interrupted — reconnecting…');return false}
@@ -16,6 +16,10 @@ socket.onclose=()=>{if(socket!==ws)return;statusMessage('Connection lost — rec
 function note(freq,offset,duration){if(!audio||!soundOn)return;const o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime+offset;o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.11,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+duration+.03)}
 function sound(name){const seq={open:[520,740],buzz:[310,245],reveal:[392,494,587,784],correct:[523,659,784],wrong:[370,294,220],daily:[392,523,659,784],final:[294,392,494,587]}[name]||[];seq.forEach((f,i)=>note(f,i*.18,.25))}
 function enableSound(){try{const C=window.AudioContext||window.webkitAudioContext;audio=audio||new C();audio.resume();soundOn=true;$('soundToggle').textContent='🔊 Sound On';$('soundToggle').setAttribute('aria-pressed','true');return true}catch{alert('This browser cannot play sound');return false}}
+// Original game-show countdown melody, generated locally (no copyrighted audio file).
+const countdownNotes=[392,494,587,494,440,523,659,523,392,494,587,784,659,587,523,494,440,523,659,523,392,440,494,587,523,494,440,392,330,392,440,494,523,587,659,587,523,494,440,392,349,440,523,659,587,523,494,440,392,494,587,784,698,659,587,523,494,440,392,330];
+function updateBuzzCountdown(){const deadline=state?.buzzOpenDeadline,active=host&&!!state?.question&&state.buzzOpen&&Number.isFinite(deadline);const el=$('buzzOpenTimer');if(!el)return;el.hidden=!active;if(!active){lastOpenSecond=null;musicStep=-1;return}const remaining=Math.max(0,deadline-Date.now()),seconds=Math.ceil(remaining/1000);$('buzzOpenNumber').textContent=seconds||'TIME!';el.classList.toggle('expired',seconds===0);if(lastOpenSecond!==seconds){if(seconds===0&&lastOpenSecond!==null)sound('wrong');lastOpenSecond=seconds}if(soundOn&&remaining>0){const step=Math.floor((30000-remaining)/500);if(step!==musicStep&&step>=0&&step<countdownNotes.length){note(countdownNotes[step],0,.34);musicStep=step}}}
+setInterval(updateBuzzCountdown,100);
 function updateTimer(){const deadline=state?.buzzDeadline,active=host&&!!state?.question&&!!state?.winner&&Number.isFinite(deadline);$('answerTimer').hidden=!active;if(!active){lastTimerSecond=null;return}const seconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));$('timerNumber').textContent=seconds||'TIME!';$('timerStatus').textContent=seconds?'seconds remaining':'Time is up!';$('answerTimer').classList.toggle('expired',seconds===0);if(lastTimerSecond!==seconds){if(lastTimerSecond!==null&&seconds>0&&seconds<5)note(660,0,.12);if(seconds===0&&lastTimerSecond!==null)sound('wrong');lastTimerSecond=seconds}}
 setInterval(updateTimer,100);
 function soundState(m){if(host&&previous){if(m.lastScore&&JSON.stringify(m.lastScore)!==JSON.stringify(previous.lastScore))sound(m.lastScore.points>=0?'correct':'wrong');else if(m.winner&&!previous.winner)sound('buzz');else if(m.question?.daily&&m.question.key!==previous.question?.key)sound('daily');else if(m.round==='final'&&previous.round!=='final')sound('final');else if(m.buzzOpen&&!previous.buzzOpen)sound('open')}previous=m}
@@ -37,7 +41,7 @@ $('answerClose').onclick=()=>{$('answerOverlay').hidden=true};
 $('next').onclick=()=>{if(!state?.question)return;$('answerOverlay').hidden=true;$('answer').hidden=true;$('clue').hidden=true;send('next')};
 function dailyAward(correct){const team=Number($('dailyTeam').value),wager=Number($('dailyWager').value),max=Math.max(state.teams[team].score,state.round==='double'?1000:500);if(!Number.isInteger(wager)||wager<5||wager>max)return alert('Wager must be between $5 and $'+max);$('clue').hidden=true;send('dailyTeam',{team});send('dailyAward',{wager,correct})}
 $('dailyCorrect').onclick=()=>dailyAward(true);$('dailyWrong').onclick=()=>dailyAward(false);
-function render(){if(!state||!questions)return;updateTimer();
+function render(){if(!state||!questions)return;updateTimer();updateBuzzCountdown();
 $('setup').hidden=true;$('game').hidden=false;$('room').textContent='Room code: '+state.code;
 $('scores').innerHTML=state.teams.map(t=>'<div>'+esc(t.name)+'<br><strong>$'+t.score+'</strong></div>').join('');
 $('host').hidden=!host;$('studentHome').hidden=host||!!state.question;
