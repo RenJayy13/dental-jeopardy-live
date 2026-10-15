@@ -1,6 +1,7 @@
 const http=require('http'),fs=require('fs'),path=require('path'),crypto=require('crypto');
 const {WebSocketServer}=require('ws');
 const rooms=new Map();
+// Room state remains in memory across brief socket interruptions.
 const id=()=>crypto.randomBytes(12).toString('hex');
 const send=(ws,data)=>{if(ws.readyState===1)ws.send(JSON.stringify(data))};
 function publish(r){for(const ws of r.clients){send(ws,{type:'state',code:r.code,teams:r.teams,players:[...r.players.values()].map(p=>({id:p.id,name:p.name,team:p.team})),buzzOpen:r.open,buzzDeadline:r.buzzDeadline||null,winner:r.winner?{name:r.players.get(r.winner)?.name,team:r.players.get(r.winner)?.team}:null,question:r.question,used:[...r.used],level:r.level,round:r.round,dailies:[...r.dailies],dailyTeam:r.dailyTeam,finalWagers:r.finalWagers,finalAnswers:r.finalAnswers,lastScore:r.lastScore,answer:ws===r.host?r.answer:null})}}
@@ -8,8 +9,9 @@ const base=path.resolve(__dirname,'public');
 const server=http.createServer((req,res)=>{let pathname;try{pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname)}catch{res.writeHead(400);return res.end()};const file=path.resolve(base,'.'+(pathname==='/'?'/index.html':pathname));if(!file.startsWith(base+path.sep)){res.writeHead(403);return res.end()};fs.readFile(file,(err,data)=>{if(err){res.writeHead(404);return res.end('Not found')};res.writeHead(200,{'Content-Type':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8'});res.end(data)})});
 const wss=new WebSocketServer({server});
 wss.on('connection',ws=>{ws.on('message',raw=>{let m;try{m=JSON.parse(raw)}catch{return}
+if(m.type==='resume'){const room=rooms.get(String(m.code||''));if(!room)return send(ws,{type:'error',message:'Room expired after a server restart. Please create a new room.'});if(m.host){if(room.host&&room.host.readyState===1)return send(ws,{type:'error',message:'Instructor is already connected'});room.host=ws;ws.room=room;room.clients.add(ws);send(ws,{type:'resumed'});publish(room);return}const player=room.players.get(String(m.id||''));if(!player)return send(ws,{type:'error',message:'Student session not found. Rejoin using the room code.'});if(player.socket&&player.socket.readyState===1)return send(ws,{type:'error',message:'Student is already connected'});player.socket=ws;ws.room=room;ws.playerId=player.id;room.clients.add(ws);send(ws,{type:'resumed'});publish(room);return}
 if(m.type==='create'){let code;do{code=String(Math.floor(100000+Math.random()*900000))}while(rooms.has(code));let r={code,host:ws,clients:new Set([ws]),players:new Map(),teams:[{name:'Team 1',score:0},{name:'Team 2',score:0},{name:'Team 3',score:0}],open:false,winner:null,buzzDeadline:null,question:null,answer:null,used:new Set(),level:'beginner',round:'single',dailies:new Set(['single:'+Math.floor(Math.random()*5)+':'+Math.floor(Math.random()*5)]),dailyTeam:null,finalWagers:[null,null,null],finalAnswers:[null,null,null],lastScore:null,scoredClue:false};rooms.set(code,r);ws.room=r;send(ws,{type:'created',code});publish(r);return}
-if(m.type==='join'){const r=rooms.get(String(m.code));if(!r)return send(ws,{type:'error',message:'Room not found'});if(r.players.size>=11)return send(ws,{type:'error',message:'Room is full (11 students)'});const name=String(m.name||'').trim().slice(0,32);if(!name)return send(ws,{type:'error',message:'Enter your name'});const pid=id();r.players.set(pid,{id:pid,name,team:r.players.size%3});r.clients.add(ws);ws.room=r;ws.playerId=pid;send(ws,{type:'joined',id:pid});publish(r);return}
+if(m.type==='join'){const r=rooms.get(String(m.code));if(!r)return send(ws,{type:'error',message:'Room not found'});if(r.players.size>=11)return send(ws,{type:'error',message:'Room is full (11 students)'});const name=String(m.name||'').trim().slice(0,32);if(!name)return send(ws,{type:'error',message:'Enter your name'});const pid=id();r.players.set(pid,{id:pid,name,team:r.players.size%3,socket:ws});r.clients.add(ws);ws.room=r;ws.playerId=pid;send(ws,{type:'joined',id:pid});publish(r);return}
 const r=ws.room;if(!r)return;
 if(m.type==='buzz'){if(!ws.playerId||!r.open||r.winner)return;r.winner=ws.playerId;r.open=false;r.buzzDeadline=Date.now()+5000;publish(r);return}
 if(ws!==r.host)return;
@@ -28,5 +30,7 @@ if(m.type==='finalWager'&&r.round==='final'){const t=Number(m.team),v=Number(m.w
 if(m.type==='finalAnswer'&&r.round==='final'){const t=Number(m.team);if(Number.isInteger(t)&&t>=0&&t<3)r.finalAnswers[t]=String(m.answer||'').slice(0,300)}
 if(m.type==='finalAward'&&r.round==='final'){const t=Number(m.team);if(Number.isInteger(t)&&t>=0&&t<3&&r.finalWagers[t]!==null){r.teams[t].score+=(m.correct?1:-1)*r.finalWagers[t];r.lastScore={team:t,points:(m.correct?1:-1)*r.finalWagers[t],total:r.teams[t].score};r.finalWagers[t]=null}}
 publish(r);
-});ws.on('close',()=>{let r=ws.room;if(!r)return;r.clients.delete(ws);if(ws.playerId)r.players.delete(ws.playerId);publish(r)})});
+});ws.on('close',()=>{let r=ws.room;if(!r)return;r.clients.delete(ws);if(ws.playerId){const p=r.players.get(ws.playerId);if(p?.socket===ws)p.socket=null}publish(r)})});
+// WebSocket ping/pong helps detect stale connections without resetting rooms.
+const heartbeat=setInterval(()=>{for(const client of wss.clients){if(client.isAlive===false){client.terminate();continue}client.isAlive=false;client.ping()}},30000);wss.on('connection',client=>{client.isAlive=true;client.on('pong',()=>{client.isAlive=true})});wss.on('close',()=>clearInterval(heartbeat));
 server.listen(process.env.PORT||3000,'0.0.0.0');
