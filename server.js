@@ -1,185 +1,25 @@
-
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
-const { WebSocketServer } = require("ws");
-
-const rooms = new Map();
-const makeId = () => crypto.randomBytes(12).toString("hex");
-
-function send(ws, data) {
-  if (ws.readyState === 1) {
-    ws.send(JSON.stringify(data));
-  }
-}
-
-function broadcast(room) {
-  const state = {
-    type: "state",
-    code: room.code,
-    teams: room.teams,
-    players: [...room.players.values()].map(p => ({
-      id: p.id,
-      name: p.name,
-      team: p.team
-    })),
-    buzzOpen: room.buzzOpen,
-    winner: room.winner
-  };
-
-  for (const ws of room.connections) {
-    send(ws, state);
-  }
-}
-
-const server = http.createServer((req, res) => {
-  const file = req.url === "/" ? "/index.html" : req.url;
-  const filePath = path.join(__dirname, "public", file);
-
-  fs.readFile(filePath, (err, content) => {
-    if (err) {
-      res.writeHead(404);
-      return res.end("File not found");
-    }
-
-    const ext = path.extname(filePath);
-    const mime = {
-      ".html": "text/html",
-      ".js": "application/javascript",
-      ".css": "text/css"
-    };
-
-    res.writeHead(200, {
-      "Content-Type": mime[ext] || "text/plain"
-    });
-    res.end(content);
-  });
-});
-
-const wss = new WebSocketServer({ server });
-
-wss.on("connection", ws => {
-  ws.on("message", raw => {
-    let msg;
-
-    try {
-      msg = JSON.parse(raw);
-    } catch {
-      return;
-    }
-
-    if (msg.type === "create") {
-      const code = String(
-        Math.floor(100000 + Math.random() * 900000)
-      );
-
-      const room = {
-        code,
-        host: ws,
-        teams: [
-          { name: "Team 1", score: 0 },
-          { name: "Team 2", score: 0 },
-          { name: "Team 3", score: 0 }
-        ],
-        players: new Map(),
-        connections: new Set([ws]),
-        buzzOpen: false,
-        winner: null
-      };
-
-      rooms.set(code, room);
-      ws.room = room;
-
-      send(ws, { type: "created", code });
-      broadcast(room);
-      return;
-    }
-
-    if (msg.type === "join") {
-      const room = rooms.get(String(msg.code));
-      if (!room) {
-        return send(ws, {
-          type: "error",
-          message: "Room not found"
-        });
-      }
-
-      if (room.players.size >= 11) {
-        return send(ws, {
-          type: "error",
-          message: "Room is full"
-        });
-      }
-
-      const id = makeId();
-      room.players.set(id, {
-        id,
-        name: String(msg.name || "Student").slice(0, 32),
-        team: room.players.size % 3
-      });
-
-      room.connections.add(ws);
-      ws.room = room;
-      ws.playerId = id;
-
-      send(ws, { type: "joined", id });
-      broadcast(room);
-      return;
-    }
-
-    const room = ws.room;
-    if (!room) return;
-
-    if (msg.type === "buzz") {
-      if (!room.buzzOpen || room.winner) return;
-      if (!ws.playerId) return;
-
-      const player = room.players.get(ws.playerId);
-      room.winner = player;
-      room.buzzOpen = false;
-
-      broadcast(room);
-      return;
-    }
-
-    if (ws !== room.host) return;
-
-    if (msg.type === "openBuzzers") {
-      room.winner = null;
-      room.buzzOpen = true;
-    }
-
-    if (msg.type === "closeBuzzers") {
-      room.buzzOpen = false;
-    }
-
-    if (msg.type === "score") {
-      const team = room.teams[msg.team];
-      if (team) {
-        team.score += Number(msg.points) || 0;
-      }
-    }
-
-    broadcast(room);
-  });
-
-  ws.on("close", () => {
-    const room = ws.room;
-    if (!room) return;
-
-    room.connections.delete(ws);
-
-    if (ws.playerId) {
-      room.players.delete(ws.playerId);
-    }
-
-    broadcast(room);
-  });
-});
-
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Dental Jeopardy running on port ${PORT}`);
-});
+const http=require('http'),fs=require('fs'),path=require('path'),crypto=require('crypto');
+const {WebSocketServer}=require('ws');
+const rooms=new Map();
+const id=()=>crypto.randomBytes(12).toString('hex');
+const send=(ws,data)=>{if(ws.readyState===1)ws.send(JSON.stringify(data))};
+function publish(r){for(const ws of r.clients){send(ws,{type:'state',code:r.code,teams:r.teams,players:[...r.players.values()].map(p=>({id:p.id,name:p.name,team:p.team})),buzzOpen:r.open,winner:r.winner?{name:r.players.get(r.winner)?.name,team:r.players.get(r.winner)?.team}:null,question:r.question,used:[...r.used],level:r.level,answer:ws===r.host?r.answer:null})}}
+const base=path.resolve(__dirname,'public');
+const server=http.createServer((req,res)=>{let pathname;try{pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname)}catch{res.writeHead(400);return res.end()};const file=path.resolve(base,'.'+(pathname==='/'?'/index.html':pathname));if(!file.startsWith(base+path.sep)){res.writeHead(403);return res.end()};fs.readFile(file,(err,data)=>{if(err){res.writeHead(404);return res.end('Not found')};res.writeHead(200,{'Content-Type':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8'});res.end(data)})});
+const wss=new WebSocketServer({server});
+wss.on('connection',ws=>{ws.on('message',raw=>{let m;try{m=JSON.parse(raw)}catch{return}
+if(m.type==='create'){let code;do{code=String(Math.floor(100000+Math.random()*900000))}while(rooms.has(code));let r={code,host:ws,clients:new Set([ws]),players:new Map(),teams:[{name:'Team 1',score:0},{name:'Team 2',score:0},{name:'Team 3',score:0}],open:false,winner:null,question:null,answer:null,used:new Set(),level:'beginner'};rooms.set(code,r);ws.room=r;send(ws,{type:'created',code});publish(r);return}
+if(m.type==='join'){const r=rooms.get(String(m.code));if(!r)return send(ws,{type:'error',message:'Room not found'});if(r.players.size>=11)return send(ws,{type:'error',message:'Room is full (11 students)'});const name=String(m.name||'').trim().slice(0,32);if(!name)return send(ws,{type:'error',message:'Enter your name'});const pid=id();r.players.set(pid,{id:pid,name,team:r.players.size%3});r.clients.add(ws);ws.room=r;ws.playerId=pid;send(ws,{type:'joined',id:pid});publish(r);return}
+const r=ws.room;if(!r)return;
+if(m.type==='buzz'){if(!ws.playerId||!r.open||r.winner)return;r.winner=ws.playerId;r.open=false;publish(r);return}
+if(ws!==r.host)return;
+if(m.type==='openBuzzers'){r.open=true;r.winner=null}
+if(m.type==='closeBuzzers')r.open=false;
+if(m.type==='score'){let t=Number(m.team),v=Number(m.points);if(Number.isInteger(t)&&t>=0&&t<3&&Number.isFinite(v)&&Math.abs(v)<=10000)r.teams[t].score+=Math.trunc(v)}
+if(m.type==='assign'){let p=r.players.get(m.id),t=Number(m.team);if(p&&Number.isInteger(t)&&t>=0&&t<3)p.team=t}
+if(m.type==='question'){r.question={category:String(m.category||'').slice(0,80),value:Number(m.value)||100,text:String(m.text||'').slice(0,1000),key:String(m.key||'')};r.answer=String(m.answer||'').slice(0,1000);r.open=false;r.winner=null}
+if(m.type==='next'){if(r.question?.key)r.used.add(r.question.key);r.question=null;r.answer=null;r.open=false;r.winner=null}
+if(m.type==='level'){if(['beginner','intermediate','advanced'].includes(m.level)){r.level=m.level;r.question=null;r.answer=null;r.used.clear();r.teams.forEach(t=>t.score=0);r.open=false;r.winner=null}}
+publish(r);
+});ws.on('close',()=>{let r=ws.room;if(!r)return;r.clients.delete(ws);if(ws.playerId)r.players.delete(ws.playerId);publish(r)})});
+server.listen(process.env.PORT||3000,'0.0.0.0');
