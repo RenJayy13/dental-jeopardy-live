@@ -5,7 +5,7 @@
 </style></head><body>
 <h1>🦷 DENTAL JEOPARDY LIVE</h1><p>North-West College • Three teams • 11 student buzzers</p>
 <section id="setup"><button id="create">Instructor: Create Room</button><p>Students: Enter room code and name</p><input id="code" placeholder="6-digit room code"><input id="name" placeholder="Student name"><button id="join">Join Room</button></section>
-<section id="game" hidden><h2 id="room"></h2><div class="scores" id="scores"></div>
+<section id="game" hidden><h2 id="room"></h2><div class="scores" id="scores"></div><div id="scoreNotice" class="panel" role="status" aria-live="polite" hidden></div>
 <section id="host" hidden><div class="panel"><label>Difficulty <select id="level"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label><label>Round <select id="round"><option value="single">Jeopardy</option><option value="double">Double Jeopardy</option><option value="final">Final Jeopardy</option></select></label><button id="copy">Copy student link</button><p class="muted">Share this tab in Zoom. Students join on their own devices.</p><div id="students"></div></div>
 <div id="board" class="board"></div>
 <div id="finalPanel" class="panel" hidden><h2>Final Jeopardy</h2><h3 id="finalQuestion"></h3><button id="finalReveal">Reveal answer</button><p id="finalAnswer" hidden></p><div id="finalTeams"></div></div>
