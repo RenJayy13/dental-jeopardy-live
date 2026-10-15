@@ -334,5 +334,357 @@
         "For medication safety, continuity of care, and adverse-event assessment"
       ]
     ]
-  ]
+  ],
+  "double": {
+    "beginner": [
+      [
+        [
+          "What is the dental term for the upper jaw?",
+          "Maxilla"
+        ],
+        [
+          "What is the dental term for the lower jaw?",
+          "Mandible"
+        ],
+        [
+          "What is the crown of a tooth?",
+          "The visible, enamel-covered portion"
+        ],
+        [
+          "What tissue covers the tooth root?",
+          "Cementum"
+        ],
+        [
+          "What is the space between adjacent teeth called?",
+          "Interproximal space"
+        ]
+      ],
+      [
+        [
+          "What instrument is used to grasp cotton rolls?",
+          "Cotton pliers"
+        ],
+        [
+          "What tool holds a dental dam in place around a tooth?",
+          "Dental dam clamp"
+        ],
+        [
+          "What material is used for temporary restorations?",
+          "Temporary filling material"
+        ],
+        [
+          "What is an articulating paper used to check?",
+          "Occlusal contacts"
+        ],
+        [
+          "What device mixes encapsulated dental materials?",
+          "Amalgamator or triturator"
+        ]
+      ],
+      [
+        [
+          "What is the purpose of surface barriers?",
+          "Reduce contamination of clinical-contact surfaces"
+        ],
+        [
+          "When must gloves be changed?",
+          "Between patients and when torn or contaminated"
+        ],
+        [
+          "What does SDS stand for?",
+          "Safety Data Sheet"
+        ],
+        [
+          "Where do used needles go?",
+          "Approved puncture-resistant sharps container"
+        ],
+        [
+          "Why are instruments cleaned before sterilizing?",
+          "Debris can interfere with sterilization"
+        ]
+      ],
+      [
+        [
+          "What is a radiopaque structure's appearance?",
+          "Light or white"
+        ],
+        [
+          "Which intraoral image is commonly used to assess interproximal decay?",
+          "Bitewing"
+        ],
+        [
+          "What does PID stand for in dental radiography?",
+          "Position-indicating device"
+        ],
+        [
+          "What is the purpose of a receptor holder?",
+          "Stabilize and position the image receptor"
+        ],
+        [
+          "What is a common cause of a blurred radiograph?",
+          "Motion during exposure"
+        ]
+      ],
+      [
+        [
+          "What is the purpose of a patient bib?",
+          "Protect clothing from splashes and debris"
+        ],
+        [
+          "What is a dental chart used for?",
+          "Document oral findings and treatment"
+        ],
+        [
+          "What is the primary purpose of floss?",
+          "Clean between teeth"
+        ],
+        [
+          "What is prophylaxis?",
+          "Professional cleaning to remove plaque and stains"
+        ],
+        [
+          "Why are post-op instructions important?",
+          "Support healing and help prevent complications"
+        ]
+      ]
+    ],
+    "intermediate": [
+      [
+        [
+          "What is the mesial surface?",
+          "Surface toward the dental midline"
+        ],
+        [
+          "What is the distal surface?",
+          "Surface away from the dental midline"
+        ],
+        [
+          "Which tissue makes up most of a tooth?",
+          "Dentin"
+        ],
+        [
+          "What is the gingival sulcus?",
+          "The shallow crevice between tooth and gingiva"
+        ],
+        [
+          "What is furcation?",
+          "The area where roots of a multirooted tooth divide"
+        ]
+      ],
+      [
+        [
+          "What is the purpose of etchant in enamel bonding?",
+          "Create microretention by conditioning enamel"
+        ],
+        [
+          "Why is composite placed in increments?",
+          "To help control curing depth and shrinkage stress"
+        ],
+        [
+          "What is a gingival retraction cord used for?",
+          "Displace gingival tissue to expose a margin"
+        ],
+        [
+          "What is a bite block used for?",
+          "Help maintain mouth opening"
+        ],
+        [
+          "Why should alginate impressions be poured promptly?",
+          "To minimize dimensional changes"
+        ]
+      ],
+      [
+        [
+          "What does standard precautions mean?",
+          "Treat blood and certain body fluids as potentially infectious"
+        ],
+        [
+          "What is an exposure-control plan?",
+          "A written plan to minimize occupational bloodborne-pathogen exposure"
+        ],
+        [
+          "Why are sterile packs checked before use?",
+          "Confirm packaging integrity and processing indicators"
+        ],
+        [
+          "What is the purpose of a sterilizer log?",
+          "Document cycles, monitoring, and maintenance"
+        ],
+        [
+          "Why is instrument transport in a closed container important?",
+          "Reduce exposure and contamination"
+        ]
+      ],
+      [
+        [
+          "What is vertical bitewing imaging useful for?",
+          "Assessing alveolar bone levels"
+        ],
+        [
+          "What causes a herringbone pattern on some film radiographs?",
+          "Film placed backward"
+        ],
+        [
+          "What is the paralleling technique?",
+          "Receptor parallel to tooth axis and beam perpendicular"
+        ],
+        [
+          "What does kVp mainly influence?",
+          "X-ray beam energy and penetration"
+        ],
+        [
+          "What does mA primarily influence?",
+          "Quantity of X-rays produced"
+        ]
+      ],
+      [
+        [
+          "What is the difference between plaque and calculus?",
+          "Plaque is soft biofilm; calculus is mineralized plaque"
+        ],
+        [
+          "What is the role of a dental assistant in consent?",
+          "Support communication and documentation within scope; clinician obtains informed consent"
+        ],
+        [
+          "What is the purpose of a periodontal probe?",
+          "Measure pocket depths and related periodontal findings"
+        ],
+        [
+          "What is a Class III cavity location?",
+          "Proximal surface of an anterior tooth without incisal angle"
+        ],
+        [
+          "Why are medical alerts flagged in charts?",
+          "To support safe care and prevent adverse events"
+        ]
+      ]
+    ],
+    "advanced": [
+      [
+        [
+          "What is the oblique ridge found on?",
+          "Maxillary molars"
+        ],
+        [
+          "What is the curve of Spee?",
+          "Anteroposterior curvature of the occlusal plane"
+        ],
+        [
+          "What is the curve of Wilson?",
+          "Mediolateral curvature of posterior occlusion"
+        ],
+        [
+          "Which nerve supplies the maxillary teeth?",
+          "Superior alveolar nerve branches of V2"
+        ],
+        [
+          "What is the function of cementoblasts?",
+          "Produce cementum"
+        ]
+      ],
+      [
+        [
+          "What does the hybrid layer refer to in dentin bonding?",
+          "Resin-infiltrated demineralized dentin"
+        ],
+        [
+          "What can inhibit composite bonding after contamination?",
+          "Saliva, blood, or other moisture"
+        ],
+        [
+          "What is a ferrule effect?",
+          "Encirclement of sound tooth structure by a crown to improve resistance to fracture"
+        ],
+        [
+          "Why is a precise finish-line impression important?",
+          "For marginal fit of indirect restorations"
+        ],
+        [
+          "What is the goal of occlusal adjustment after restoration?",
+          "Remove unintended high contacts and harmonize occlusion"
+        ]
+      ],
+      [
+        [
+          "What is a sterilization load recall?",
+          "Retrieving items processed in a suspect sterilization cycle"
+        ],
+        [
+          "Why is a biological indicator superior to chemical tape for monitoring sterilization?",
+          "It directly challenges microbial killing with resistant spores"
+        ],
+        [
+          "What is the purpose of instrument point-of-use treatment?",
+          "Prevent debris drying before cleaning"
+        ],
+        [
+          "What must be checked before using a disinfectant?",
+          "EPA registration, contact time, surface compatibility and label directions"
+        ],
+        [
+          "What is the distinction between cleaning and high-level disinfection?",
+          "Cleaning removes soil; high-level disinfection inactivates nearly all microorganisms but not necessarily all spores"
+        ]
+      ],
+      [
+        [
+          "What causes cervical burnout on a radiograph?",
+          "An optical radiolucency from reduced tooth thickness near the CEJ"
+        ],
+        [
+          "What is the SLOB localization rule?",
+          "Same lingual, opposite buccal"
+        ],
+        [
+          "What is the inverse square law in radiation?",
+          "Intensity varies inversely with distance squared"
+        ],
+        [
+          "What is a key limitation of a two-dimensional radiograph?",
+          "Superimposition and lack of depth information"
+        ],
+        [
+          "What is a common indication for CBCT?",
+          "A justified need for 3D assessment when conventional imaging is insufficient"
+        ]
+      ],
+      [
+        [
+          "What is the primary concern with intravascular local anesthetic injection?",
+          "Systemic toxicity and adverse cardiovascular or neurologic effects"
+        ],
+        [
+          "What is the difference between a vasoconstrictor and anesthetic?",
+          "Vasoconstrictor narrows vessels; anesthetic blocks nerve conduction"
+        ],
+        [
+          "Why is a documented emergency drill valuable?",
+          "It improves coordinated response and reveals preparedness gaps"
+        ],
+        [
+          "What is the purpose of a preprocedural verification?",
+          "Confirm patient, procedure, site, and relevant records"
+        ],
+        [
+          "What is the first priority when an unresponsive patient is found?",
+          "Assess responsiveness, call for help, and assess breathing/pulse per current BLS training"
+        ]
+      ]
+    ]
+  },
+  "final": {
+    "beginner": [
+      "What term describes the tissue that covers the tooth crown?",
+      "Enamel"
+    ],
+    "intermediate": [
+      "What dental term means the meeting point of enamel and cementum?",
+      "Cementoenamel junction (CEJ)"
+    ],
+    "advanced": [
+      "What rule predicts the movement of an object on tube-shift radiographs?",
+      "SLOB: same lingual, opposite buccal"
+    ]
+  }
 }
